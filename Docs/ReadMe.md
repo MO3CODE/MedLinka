@@ -1,4 +1,4 @@
-# Medical care reminder and pharmacy
+# MedLinka
 
 ## Team Details
 
@@ -17,4 +17,4 @@ Many people struggle to access medical care due to financial or physical limitat
 
 ## Architecture Link
 
-[View the Software Architecture Documentation](ARCHITECTURE.md)
+ARCHITECTURE.md
