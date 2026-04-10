@@ -1,7 +1,7 @@
 # MedLinka
 
 ![MedLinka](https://raw.githubusercontent.com/krkralkair007/Medical-care-reminder-and-pharmacy-/main/MEDLINKA%20PIC%20INFO.jpg)
-
+![MedLinka](https://github.com/krkralkair007/Medical-care-reminder-and-pharmacy-/blob/1fe087350b4c157b14ac555fe8ddc88b33d2acf6/MID%20PIC.jpg)
 ## Team Details
 
 | Name | Student ID | GitHub Username |
