@@ -1,4 +1,5 @@
-Video link: 
+GitHub repository URL : https://github.com/Mohammad-Alnajjar4/Medical-care-reminder-and-pharmacy-
+YouTube URL : 
 
 ![ MedLinka](https://github.com/Mohammad-Alnajjar4/Medical-care-reminder-and-pharmacy-/blob/1118761c3e032264133893a2caab51df5db56137/MedLinkaImage.png)
 
