@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedLinka Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal: #0a7c6e; --teal-light: #12a090; --teal-dark: #0a4d45;
+  --teal-bg: #e8f8f6; --bg: #f0f4f8; --sidebar-bg: #0d1f1c;
+  --text: #1a2e35; --muted: #8a9ab0; --border: #e0e8f0;
+  --white: #fff; --danger: #e53e3e; --success: #1a8a5a; --warn: #d97706;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg); color:var(--text); display:flex; min-height:100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width:240px; background:var(--sidebar-bg); flex-shrink:0;
+  display:flex; flex-direction:column; padding:0;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.sidebar-brand { padding:24px 20px 20px; border-bottom:1px solid rgba(255,255,255,0.08); }
+.sidebar-brand h1 { font-size:20px; font-weight:800; color:#fff; }
+.sidebar-brand span { font-size:11px; color:rgba(255,255,255,0.4); letter-spacing:2px; text-transform:uppercase; }
+.sidebar-nav { padding:16px 12px; flex:1; }
+.nav-item {
+  display:flex; align-items:center; gap:10px; padding:10px 12px;
+  border-radius:10px; cursor:pointer; transition:all 0.2s;
+  color:rgba(255,255,255,0.55); font-size:14px; font-weight:600;
+  margin-bottom:2px; border:none; background:none; width:100%; text-align:left;
+}
+.nav-item:hover { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.85); }
+.nav-item.active { background:rgba(18,160,144,0.2); color:#4ee5d4; }
+.nav-item .icon { font-size:18px; width:20px; text-align:center; }
+.sidebar-footer { padding:16px 20px; border-top:1px solid rgba(255,255,255,0.08); }
+.sidebar-footer a { color:rgba(255,255,255,0.4); font-size:12px; text-decoration:none; }
+.sidebar-footer a:hover { color:rgba(255,255,255,0.7); }
+
+/* ── MAIN ── */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.topbar { background:#fff; border-bottom:1px solid var(--border); padding:0 28px; height:64px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.topbar-title { font-size:18px; font-weight:800; }
+.topbar-right { display:flex; align-items:center; gap:12px; }
+.admin-badge { background:var(--teal-bg); color:var(--teal); font-size:12px; font-weight:700; padding:4px 12px; border-radius:20px; }
+.refresh-btn { background:var(--teal); color:#fff; border:none; padding:8px 16px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+.refresh-btn:hover { background:var(--teal-dark); }
+
+.content { flex:1; overflow-y:auto; padding:24px 28px; }
+
+/* ── STAT CARDS ── */
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+.stat-card { background:#fff; border-radius:16px; padding:20px; border:1px solid var(--border); }
+.stat-label { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+.stat-value { font-size:28px; font-weight:800; color:var(--text); }
+.stat-sub { font-size:12px; color:var(--muted); margin-top:4px; }
+.stat-icon { font-size:28px; float:right; opacity:0.6; }
+
+/* ── SECTION HEADER ── */
+.section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.section-header h2 { font-size:16px; font-weight:800; }
+.section-header .count { background:var(--teal-bg); color:var(--teal); font-size:12px; font-weight:700; padding:2px 8px; border-radius:20px; }
+
+/* ── TABLE ── */
+.table-wrap { background:#fff; border-radius:16px; border:1px solid var(--border); overflow:hidden; margin-bottom:28px; }
+table { width:100%; border-collapse:collapse; }
+th { background:#f8fafb; padding:12px 16px; text-align:left; font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border); }
+td { padding:12px 16px; font-size:13px; border-bottom:1px solid #f5f7fa; vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:#fafcfd; }
+
+/* ── BADGES ── */
+.badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+.badge-success { background:#d4f5e9; color:#1a8a5a; }
+.badge-warn { background:#fef3cd; color:#b87a00; }
+.badge-danger { background:#fde8e8; color:#c53030; }
+.badge-info { background:#e3f2fd; color:#1565c0; }
+.badge-muted { background:#e8edf2; color:#5a7080; }
+
+/* ── VERIFY BTN ── */
+.verify-btn { background:var(--teal); color:#fff; border:none; padding:5px 12px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; }
+.verify-btn:disabled { background:#ccc; cursor:not-allowed; }
+
+/* ── TABS ── */
+.tabs { display:flex; gap:4px; background:#e8edf2; border-radius:12px; padding:4px; margin-bottom:20px; }
+.tab-btn { flex:1; padding:8px; border-radius:8px; border:none; background:none; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; font-family:inherit; transition:all 0.2s; }
+.tab-btn.active { background:#fff; color:var(--teal); box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+
+/* ── PANELS ── */
+.panel { display:none; }
+.panel.active { display:block; }
+
+/* ── LOADING ── */
+.loading { text-align:center; padding:40px; color:var(--muted); font-size:14px; }
+
+/* ── REVENUE BAR ── */
+.rev-bar-wrap { background:#fff; border-radius:16px; border:1px solid var(--border); padding:20px; margin-bottom:28px; }
+.rev-bar { height:8px; background:#e8edf2; border-radius:4px; overflow:hidden; margin-top:8px; }
+.rev-fill { height:100%; background:linear-gradient(90deg,var(--teal),var(--teal-light)); border-radius:4px; transition:width 1s ease; }
+
+/* ── EMPTY STATE ── */
+.empty { text-align:center; padding:40px 20px; color:var(--muted); }
+.empty-icon { font-size:40px; margin-bottom:8px; }
+
+/* ── TOAST ── */
+#adminToast { position:fixed; bottom:24px; right:24px; background:#1a2e35; color:#fff; padding:12px 20px; border-radius:12px; font-size:13px; font-weight:700; z-index:9999; transform:translateY(20px); opacity:0; transition:all 0.3s; pointer-events:none; }
+#adminToast.show { transform:translateY(0); opacity:1; }
+#adminToast.success { background:#1a8a5a; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <h1>🏥 MedLinka</h1>
+    <span>Admin Dashboard</span>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="showPanel('overview')"><span class="icon">📊</span> Overview</button>
+    <button class="nav-item" onclick="showPanel('users')"><span class="icon">👤</span> Users</button>
+    <button class="nav-item" onclick="showPanel('doctors')"><span class="icon">👨‍⚕️</span> Doctors</button>
+    <button class="nav-item" onclick="showPanel('pharmacies')"><span class="icon">💊</span> Pharmacies</button>
+    <button class="nav-item" onclick="showPanel('appointments')"><span class="icon">📅</span> Appointments</button>
+    <button class="nav-item" onclick="showPanel('orders')"><span class="icon">🛒</span> Orders</button>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/">← Back to App</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="panelTitle">Overview</div>
+    <div class="topbar-right">
+      <span class="admin-badge">Admin</span>
+      <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ OVERVIEW ══ -->
+    <div class="panel active" id="panel-overview">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="loading">Loading…</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div class="section-header"><h2>Recent Users</h2></div>
+          <div class="table-wrap" id="recentUsersTable"><div class="loading">Loading…</div></div>
+        </div>
+        <div>
+          <div class="section-header"><h2>Recent Orders</h2></div>
+          <div class="table-wrap" id="recentOrdersTable"><div class="loading">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div class="panel" id="panel-users">
+      <div class="section-header">
+        <h2>All Users <span class="count" id="usersCount">0</span></h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+          <tbody id="usersTableBody"><tr><td colspan="5" class="loading">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ DOCTORS ══ -->
+    <div class="panel" id="panel-doctors">
+      <div class="section-header">
+        <h2>Doctors <span class="count" id="doctorsCount">0</span></h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Doctor</th><th>Specialty</th><th>Rating</th><th>Fee</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="doctorsTableBody"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ PHARMACIES ══ -->
+    <div class="panel" id="panel-pharmacies">
+      <div class="section-header">
+        <h2>Pharmacies <span class="count" id="pharmaciesCount">0</span></h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Address</th><th>Hours</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="pharmaciesTableBody"><tr><td colspan="5" class="loading">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ APPOINTMENTS ══ -->
+    <div class="panel" id="panel-appointments">
+      <div class="section-header">
+        <h2>Appointments <span class="count" id="apptsCount">0</span></h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Slot</th><th>Fee</th><th>Status</th></tr></thead>
+          <tbody id="apptsTableBody"><tr><td colspan="7" class="loading">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ ORDERS ══ -->
+    <div class="panel" id="panel-orders">
+      <div class="section-header">
+        <h2>Orders <span class="count" id="ordersCount">0</span></h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Patient</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="ordersTableBody"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="adminToast"></div>
+
+<script>
+const API = '/api';
+let token = localStorage.getItem('ml_token');
+
+async function req(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (token) opts.headers['Authorization'] = `Bearer ${token}`;
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  if (res.status === 401) {
+    showToast('Please login first from the app', 'warn');
+    setTimeout(() => window.location.href = '/', 2000);
+    return null;
+  }
+  return res.json();
+}
+
+function toast(msg, type='success') {
+  const el = document.getElementById('adminToast');
+  el.textContent = msg; el.className = 'show ' + type;
+  setTimeout(() => el.className = '', 3000);
+}
+function showToast(m, t) { toast(m, t); }
+
+function fmt(date) {
+  if (!date) return '—';
+  return new Date(date).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function badge(text, type='info') {
+  return `<span class="badge badge-${type}">${text}</span>`;
+}
+
+// ── PANELS ──
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  document.getElementById('panelTitle').textContent = name.charAt(0).toUpperCase()+name.slice(1);
+  loadPanel(name);
+}
+
+// ── LOAD ALL ──
+async function loadAll() {
+  await loadPanel('overview');
+}
+
+async function loadPanel(name) {
+  if (name === 'overview') await loadOverview();
+  else if (name === 'users') await loadUsers();
+  else if (name === 'doctors') await loadDoctors();
+  else if (name === 'pharmacies') await loadPharmacies();
+  else if (name === 'appointments') await loadAppointments();
+  else if (name === 'orders') await loadOrders();
+}
+
+// ── OVERVIEW ──
+async function loadOverview() {
+  const data = await req('GET', '/admin/stats');
+  if (!data) return;
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon">👤</div>
+      <div class="stat-label">Registered Users</div>
+      <div class="stat-value">${data.users}</div>
+      <div class="stat-sub">Patients</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👨‍⚕️</div>
+      <div class="stat-label">Doctors</div>
+      <div class="stat-value">${data.doctors}</div>
+      <div class="stat-sub">Medical professionals</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <div class="stat-label">Appointments</div>
+      <div class="stat-value">${data.appointments}</div>
+      <div class="stat-sub">Total bookings</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-label">Revenue</div>
+      <div class="stat-value">$${Number(data.totalRevenue).toLocaleString()}</div>
+      <div class="stat-sub">From ${data.orders} orders</div>
+    </div>`;
+
+  // Recent users
+  document.getElementById('recentUsersTable').innerHTML = data.recentUsers.length ? `
+    <table><thead><tr><th>Name</th><th>Email</th><th>Joined</th></tr></thead><tbody>
+    ${data.recentUsers.map(u => `<tr>
+      <td><strong>${u.name}</strong></td>
+      <td style="color:#5a7080">${u.email}</td>
+      <td>${fmt(u.createdAt)}</td>
+    </tr>`).join('')}
+    </tbody></table>` : '<div class="empty"><div class="empty-icon">👤</div><p>No users yet</p></div>';
+
+  // Recent orders
+  document.getElementById('recentOrdersTable').innerHTML = data.recentOrders.length ? `
+    <table><thead><tr><th>#</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody>
+    ${data.recentOrders.map(o => `<tr>
+      <td>#${o.id}</td>
+      <td><strong>$${o.total}</strong></td>
+      <td>${badge(o.status,'success')}</td>
+      <td>${fmt(o.createdAt)}</td>
+    </tr>`).join('')}
+    </tbody></table>` : '<div class="empty"><div class="empty-icon">🛒</div><p>No orders yet</p></div>';
+}
+
+// ── USERS ──
+async function loadUsers() {
+  const data = await req('GET', '/admin/users');
+  if (!data) return;
+  document.getElementById('usersCount').textContent = data.users.length;
+  document.getElementById('usersTableBody').innerHTML = data.users.length ? data.users.map(u => `<tr>
+    <td style="color:var(--muted)">#${u.id}</td>
+    <td><strong>${u.name}</strong></td>
+    <td style="color:#5a7080">${u.email}</td>
+    <td>${badge('Patient','info')}</td>
+    <td>${fmt(u.createdAt)}</td>
+  </tr>`).join('') : '<tr><td colspan="5" class="empty"><div class="empty-icon">👤</div><p>No users yet</p></td></tr>';
+}
+
+// ── DOCTORS ──
+async function loadDoctors() {
+  const data = await req('GET', '/admin/doctors');
+  if (!data) return;
+  document.getElementById('doctorsCount').textContent = data.doctors.length;
+  document.getElementById('doctorsTableBody').innerHTML = data.doctors.map(d => `<tr>
+    <td>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:38px;height:38px;border-radius:12px;background:${d.color};display:flex;align-items:center;justify-content:center;font-size:18px">${d.emoji}</div>
+        <div><div style="font-weight:700">${d.name}</div><div style="font-size:11px;color:var(--muted)">${d.email}</div></div>
+      </div>
+    </td>
+    <td>${d.specialty_en}</td>
+    <td>⭐ ${d.rating} <span style="color:var(--muted);font-size:11px">(${d.patients} pts)</span></td>
+    <td><strong>$${d.fee}</strong></td>
+    <td>${d.verified ? badge('Verified','success') : badge('Pending','warn')}</td>
+    <td>${d.verified ? '<span style="color:var(--muted);font-size:12px">✓</span>' : `<button class="verify-btn" onclick="verify('doctor',${d.id},this)">Verify</button>`}</td>
+  </tr>`).join('');
+}
+
+// ── PHARMACIES ──
+async function loadPharmacies() {
+  const data = await req('GET', '/api/pharmacy');
+  if (!data) return;
+  document.getElementById('pharmaciesCount').textContent = data.pharmacies.length;
+  document.getElementById('pharmaciesTableBody').innerHTML = data.pharmacies.map(p => `<tr>
+    <td><strong>${p.name}</strong><div style="font-size:11px;color:var(--muted)">${p.email}</div></td>
+    <td style="color:#5a7080">${p.address}</td>
+    <td>${p.open_hours}</td>
+    <td>${p.verified ? badge('Verified','success') : badge('Pending','warn')}</td>
+    <td>${p.verified ? '<span style="color:var(--muted);font-size:12px">✓</span>' : `<button class="verify-btn" onclick="verify('pharmacy',${p.id},this)">Verify</button>`}</td>
+  </tr>`).join('');
+}
+
+// ── APPOINTMENTS ──
+async function loadAppointments() {
+  const data = await req('GET', '/admin/appointments');
+  if (!data) return;
+  document.getElementById('apptsCount').textContent = data.appointments.length;
+  document.getElementById('apptsTableBody').innerHTML = data.appointments.length ? data.appointments.map(a => `<tr>
+    <td style="color:var(--muted)">#${a.id}</td>
+    <td><strong>${a.patientName}</strong></td>
+    <td>${a.doctorName}<div style="font-size:11px;color:var(--muted)">${a.doctorSpecialty}</div></td>
+    <td>${a.date}</td>
+    <td><span style="font-weight:700;color:var(--teal)">${a.slot}</span></td>
+    <td><strong>$${a.fee}</strong></td>
+    <td>${badge(a.status, a.status==='confirmed'?'success':'muted')}</td>
+  </tr>`).join('') : '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📅</div><p>No appointments yet</p></div></td></tr>';
+}
+
+// ── ORDERS ──
+async function loadOrders() {
+  const data = await req('GET', '/admin/orders');
+  if (!data) return;
+  document.getElementById('ordersCount').textContent = data.orders.length;
+  document.getElementById('ordersTableBody').innerHTML = data.orders.length ? data.orders.map(o => `<tr>
+    <td style="color:var(--muted)">#${o.id}</td>
+    <td><strong>${o.patientName}</strong></td>
+    <td style="color:#5a7080">${o.items.map(i=>i.name_en).join(', ').substring(0,40)}${o.items.length>2?'…':''}</td>
+    <td><strong style="color:var(--teal)">$${o.total}</strong></td>
+    <td>${badge(o.status,'success')}</td>
+    <td>${fmt(o.createdAt)}</td>
+  </tr>`).join('') : '<tr><td colspan="6"><div class="empty"><div class="empty-icon">🛒</div><p>No orders yet</p></div></td></tr>';
+}
+
+// ── VERIFY ──
+async function verify(type, id, btn) {
+  btn.disabled = true; btn.textContent = '…';
+  const data = await req('PATCH', `/admin/verify/${type}/${id}`);
+  if (data) { toast(`✓ ${type} verified successfully`, 'success'); loadPanel(type+'s'); }
+  else { btn.disabled = false; btn.textContent = 'Verify'; }
+}
+
+// ── INIT ──
+loadOverview();
+</script>
+</body>
+</html>
