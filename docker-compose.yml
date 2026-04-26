@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  medlinka:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - JWT_SECRET=medlinka_production_secret_change_me
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - NODE_ENV=production
+    volumes:
+      - ./frontend:/app/frontend
+    restart: unless-stopped
